@@ -1,0 +1,9 @@
+{
+  "name": "dsh-locale-fr",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "French language pack for the DeepSeek Harness Web UI",
+  "dsh": { "client": { "platform": "web" } },
+  "main": "index.js"
+}
