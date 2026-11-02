@@ -1,10 +1,12 @@
 #!/usr/bin/env node
-/** Report which client namespaces still lack a French dictionary. */
+/** Report client namespaces that ship no French dictionary, in either declaration form. */
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 
 const ROOT = process.argv[2] ?? process.cwd()
 const GROUPS = ['packages/client', 'packages/experimental']
+// Both declaration forms: `export const fr = {…}` and prefixed exports such as `export const zoomFr = {…}`.
+const HAS_FR = /(?:export\s+const\s+[A-Za-z_]*[Ff]r[A-Za-z_]*\s*=|(?:^|\n)\s*fr:\s*\{)/u
 
 function walk(dir, out = []) {
   for (const entry of readdirSync(dir)) {
@@ -23,11 +25,9 @@ for (const group of GROUPS) {
   try { files = walk(join(ROOT, group)) } catch { continue }
   for (const file of files.sort()) {
     const text = readFileSync(file, 'utf8')
-    if (/\bfr:\s*\{/u.test(text)) covered += 1
-    else {
-      missing += 1
-      console.log(`${String(text.split('\n').length).padStart(5)}  ${file.slice(ROOT.length + 1)}`)
-    }
+    if (HAS_FR.test(text)) { covered += 1; continue }
+    missing += 1
+    console.log(`${String(text.split('\n').length).padStart(5)}  ${file.slice(ROOT.length + 1)}`)
   }
 }
-console.log(`\n${covered} traduits, ${missing} sans français`)
+console.log(`\n${covered} avec français, ${missing} sans`)
